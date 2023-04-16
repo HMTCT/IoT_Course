@@ -27,6 +27,8 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.nio.charset.Charset;
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity3 extends AppCompatActivity {
     MQTTHelper mqttHelper;
@@ -42,6 +44,7 @@ public class MainActivity3 extends AppCompatActivity {
     DbButtonPump ButtonPump;
     DBHelper LightHelper;
     SQLiteDatabase sqLiteDatabase;
+    Timer timer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +76,17 @@ public class MainActivity3 extends AppCompatActivity {
         txtTemp.setText(String.valueOf(TempHelper.getLastYValue()) + " °C");
         txtLight.setText(String.valueOf(LightHelper.getLastYValue()) + " lux");
         motion.setText(dbAI.getLastYValue());
+
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                TempHelper.deleteOldData(24 * 60 * 60);
+                HumiHelper.deleteOldData(24 * 60 * 60);
+                LightHelper.deleteOldData(24 * 60 * 60);
+            }
+        }, 100000);
+
         sBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             int pval = 0;
             @Override
@@ -280,5 +294,4 @@ public class MainActivity3 extends AppCompatActivity {
         Intent intent = new Intent(this, Button_history.class);
         startActivity(intent);
     }
-
 }

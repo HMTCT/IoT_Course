@@ -1,11 +1,14 @@
 package Demo.Android;
 
+import android.util.Log;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import java.util.Calendar;
 
 public class DbTemp extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 13;
@@ -57,4 +60,25 @@ public class DbTemp extends SQLiteOpenHelper {
         Cursor data = db.rawQuery("SELECT * FROM " + "Temp",null);
         return data;
     }
+    public void deleteOldData(int time){
+
+        Calendar cal = Calendar.getInstance();
+        long currentTimeInMillis = cal.getTimeInMillis();
+
+        long timeTarget = time * 1000; // time * second
+        long timeToDelete = currentTimeInMillis - timeTarget;
+
+        // Tạo câu truy vấn xóa dữ liệu
+        String deleteQuery = "DELETE FROM Temp WHERE xValues < '" + timeToDelete + "';";
+        // Mở kết nối đến cơ sở dữ liệu SQLite
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // Thực hiện câu truy vấn xóa dữ liệu
+        db.execSQL(deleteQuery);
+        Log.d("Result", "Đã xóa data quá 1 ngày");
+
+        // Đóng kết nối đến cơ sở dữ liệu SQLite
+        db.close();
+    }
+
 }
