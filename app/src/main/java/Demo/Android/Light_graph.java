@@ -4,13 +4,11 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 
 import com.ekn.gruzer.gaugelibrary.ArcGauge;
 import com.ekn.gruzer.gaugelibrary.Range;
@@ -153,7 +151,7 @@ public class Light_graph extends AppCompatActivity {
                 Log.d("TEST",topic + "---" + message.toString());
 
 
-                if(topic.contains("light2")){
+                if(topic.contains("cambien2")){
                     arcGauge = findViewById(R.id.lightgauge);
                     Range range1 = new Range();
                     range1.setFrom(0.0);

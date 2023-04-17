@@ -14,15 +14,21 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import java.util.UUID;
+
+
 
 public class MQTTHelper {
     public MqttAndroidClient mqttAndroidClient;
 
-    public final String[] arrayTopics = {"LamVinh/feeds/humi-info", "LamVinh/feeds/temp-info","LamVinh/feeds/AI","LamVinh/feeds/fan","LamVinh/feeds/button1","LamVinh/feeds/motion","LamVinh/feeds/light2","LamVinh/feeds/button2","LamVinh/feeds/ai"};
+    public final String[] arrayTopics = {"triethoang/feeds/cambien1", "triethoang/feeds/cambien2", "triethoang/feeds/cambien3",
+            "triethoang/feeds/button1", "triethoang/feeds/button2", "triethoang/feeds/ack", "triethoang/feeds/ai",
+            "triethoang/feeds/error"};
 
-    final String clientId = "TeddyLoid";
-    final String username = "LamVinh";
-    final String password = "aio_qSSr365wOceIXONZeKfgiCEICdqH";
+    final String clientId = UUID.randomUUID().toString();
+    //final String clientId = "3345466";
+    final String username = "triethoang";
+    final String password = "aio_bzrj69hKsWJmZ6x0qsluqKih3d1e";
 
     final String serverUri = "tcp://io.adafruit.com:1883";
 

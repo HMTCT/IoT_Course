@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import java.util.Calendar;
 
 public class DbTemp extends SQLiteOpenHelper {
-    private static final int DATABASE_VERSION = 13;
+    private static final int DATABASE_VERSION = 23;
 
     public DbTemp(Context context) {
         super(context, "demo", null, DATABASE_VERSION);

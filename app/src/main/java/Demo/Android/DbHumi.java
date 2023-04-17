@@ -11,7 +11,7 @@ import android.util.Log;
 import java.util.Calendar;
 
 public class DbHumi extends SQLiteOpenHelper {
-    private static final int DATABASE_VERSION = 13;
+    private static final int DATABASE_VERSION = 23;
 
     public DbHumi(Context context) {
         super(context, "demo", null, DATABASE_VERSION);

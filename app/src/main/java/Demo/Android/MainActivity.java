@@ -1,17 +1,11 @@
 package Demo.Android;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 public class MainActivity extends AppCompatActivity {
     MQTTHelper mqttHelper;
@@ -37,9 +31,9 @@ public class MainActivity extends AppCompatActivity {
         DbButton = new DbButton(this);
         DbButtonPump = new DbButtonPump(this);
         //Dòng này nên comment khi demo, dòng xóa hết dữ liệu của bảng
-//        HumiHelper.deleteAllData();
-//       TempHelper.deleteAllData();
- //       LightHelper.deleteAllData();
+        HumiHelper.deleteAllData();
+       TempHelper.deleteAllData();
+        LightHelper.deleteAllData();
         DbButton.deleteAllData();
         DbButtonPump.deleteAllData();
         //Login function

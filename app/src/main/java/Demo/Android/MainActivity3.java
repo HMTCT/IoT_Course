@@ -1,14 +1,11 @@
 package Demo.Android;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
-import android.widget.Toast;
 
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
@@ -17,7 +14,6 @@ import com.github.angads25.toggle.interfaces.OnToggledListener;
 import com.github.angads25.toggle.model.ToggleableView;
 import com.github.angads25.toggle.widget.DayNightSwitch;
 import com.github.angads25.toggle.widget.LabeledSwitch;
-import com.jjoe64.graphview.series.DataPoint;
 
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -29,6 +25,8 @@ import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity3 extends AppCompatActivity {
     MQTTHelper mqttHelper;
@@ -45,6 +43,10 @@ public class MainActivity3 extends AppCompatActivity {
     DBHelper LightHelper;
     SQLiteDatabase sqLiteDatabase;
     Timer timer;
+
+    ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(2);
+    boolean btnLightTimeout  = true;
+    boolean btnPUMPTimeout = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +104,7 @@ public class MainActivity3 extends AppCompatActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {
                 tView.setText(pval + "/" + seekBar.getMax());
                 String s = Integer.toString(pval);
-                sendDataMQTT("LamVinh/feeds/fan\n",s);
+                //sendDataMQTT("LamVinh/feeds/fan\n",s);
 
             }
         });
@@ -157,32 +159,53 @@ public class MainActivity3 extends AppCompatActivity {
             @Override
             public void onSwitched(ToggleableView toggleableView, boolean isOn) {
                 if(isOn == true){
-                    sendDataMQTT("LamVinh/feeds/button1\n", "1");
+                    sendDataMQTT("triethoang/feeds/button1\n", "1");
                     long xValues = new Date().getTime();
                     ButtonHelper.InsertData(xValues,"Button Light is ON");
                 }
                 else{
-                    sendDataMQTT("LamVinh/feeds/button1\n", "0");
+                    sendDataMQTT("triethoang/feeds/button1\n", "0");
                     long xValues = new Date().getTime();
                     ButtonHelper.InsertData(xValues,"Button Light is OFF");
 
                 }
+                btnLight.setEnabled(false);
+                btnLightTimeout = true;
+                exec.schedule(new Runnable() {
+                    public void run() {
+                        if (!btnLightTimeout)
+                            return;
+                        btnLight.setEnabled(true);
+                        btnLight.setOn(!btnLight.isOn());
+                    }
+                }, 10, TimeUnit.SECONDS);
             }
         });
         btnPump.setOnToggledListener(new OnToggledListener() {
             @Override
             public void onSwitched(ToggleableView toggleableView, boolean isOn) {
                 if(isOn == true){
-                    sendDataMQTT("LamVinh/feeds/button2\n", "1");
+                    sendDataMQTT("triethoang/feeds/button2\n", "1");
                     long xValues = new Date().getTime();
                     ButtonPump.InsertData(xValues,"Button Pump is ON");
                 }
                 else{
-                    sendDataMQTT("LamVinh/feeds/button2\n", "0");
+                    sendDataMQTT("triethoang/feeds/button2\n", "0");
                     long xValues = new Date().getTime();
                     ButtonPump.InsertData(xValues,"Button Pump is OFF");
 
                 }
+
+                btnPump.setEnabled(false);
+                btnPUMPTimeout = true;
+                exec.schedule(new Runnable() {
+                    public void run() {
+                        if (!btnPUMPTimeout)
+                            return;
+                        btnPump.setEnabled(true);
+                        btnPump.setOn(!btnPump.isOn());
+                    }
+                }, 5, TimeUnit.SECONDS);
             }
         });
         startMQTT();
@@ -220,14 +243,20 @@ public class MainActivity3 extends AppCompatActivity {
             public void messageArrived(String topic, MqttMessage message) throws Exception {
                 Log.d("TEST",topic + "---" + message.toString());
 
-                if(topic.contains("humi-info")){
-                    txtHumi.setText(message.toString()+"  %");
+                if(topic.contains("cambien3")){
+                    long xValues = new Date().getTime();
+                    HumiHelper.InsertData(xValues,Double.parseDouble(message.toString()));
+                    txtHumi.setText(String.valueOf(HumiHelper.getLastYValue())+"%");
                 }
-                else if(topic.contains("temp-info")){
-                    txtTemp.setText(message.toString()+"  °C");
+                else if(topic.contains("cambien1")){
+                    long xValues = new Date().getTime();
+                    TempHelper.InsertData(xValues,Double.parseDouble(message.toString()));
+                    txtTemp.setText(String.valueOf(TempHelper.getLastYValue())+"°C");
                 }
-                else if(topic.contains("light2")){
-                    txtLight.setText(message.toString()+"   lux");
+                else if(topic.contains("cambien2")){
+                    long xValues = new Date().getTime();
+                    LightHelper.InsertData(xValues,Double.parseDouble(message.toString()));
+                    txtLight.setText(String.valueOf(LightHelper.getLastYValue())+"Lux");
                 }
                 else if(topic.contains("ai")){
                     motion.setText(message.toString());
@@ -235,16 +264,17 @@ public class MainActivity3 extends AppCompatActivity {
                     dbAI.InsertData(xValues,message.toString());
 
                 }
-                else if(topic.contains("button1")){
-                    if(message.toString().equals("1")){
+                else if(topic.contains("button1")) {
+                    if (message.toString().equals("1")) {
                         btnLight.setOn(true);
                         long xValues = new Date().getTime();
                         ButtonHelper.InsertData(xValues,"Button Light is ON");
 
-                    }
-                    else {btnLight.setOn(false);
+                    } else {
+                        btnLight.setOn(false);
                         long xValues = new Date().getTime();
-                        ButtonHelper.InsertData(xValues,"Button Light is OFF");}
+                        ButtonHelper.InsertData(xValues,"Button Light is OFF");
+                    }
                 }
                 else if(topic.contains("button2")){
                     if(message.toString().equals("1")){
@@ -260,6 +290,40 @@ public class MainActivity3 extends AppCompatActivity {
                 else if(topic.contains("fan")){
                     sBar.setProgress(Integer.parseInt(message.toString()));
                     tView.setText((message.toString())+"/" + sBar.getMax());
+                }
+
+                else if (topic.contains("ack") || topic.contains("error")){
+                    String[] msg = message.toString().split(":");
+                    if (msg[0].equals("button1")){
+                        btnLightTimeout = false;
+
+                        if (topic.contains("error")){
+                            btnLight.setEnabled(true);
+                            btnLight.setOn(!btnLight.isOn());
+                            return;
+                        }
+
+                        int isOn = btnLight.isOn()? 1:0;
+                        if (isOn == Integer.parseInt(msg[1])){
+                            btnLight.setEnabled(true);
+                            btnLight.setOn(btnLight.isOn());
+                        }
+                    }
+                    if (msg[0].equals("button2")){
+                        btnPUMPTimeout = false;
+
+                        if (topic.contains("error")){
+                            btnPump.setEnabled(true);
+                            btnPump.setOn(!btnPump.isOn());
+                            return;
+                        }
+
+                        int isOn = btnPump.isOn()? 1:0;
+                        if (isOn == Integer.parseInt(msg[1])) {
+                            btnPump.setEnabled(true);
+                            btnPump.setOn(btnPump.isOn());
+                        }
+                    }
                 }
             }
 
